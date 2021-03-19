@@ -1,53 +1,79 @@
-# MasternodeSetup
+![Example-Logo](https://avatars.githubusercontent.com/u/74295691?s=460&u=d19fb6a5f6df729cb0d9f5478a1619edd56cd415&v=4)
+
+# Trittium Masternode Setup Guide
+***
+## Required
+1) **100000 TRTT coins**
+2) **Local Wallet https://github.com/Trittium/trittium/releases**
+3) **VPS with UBUNTU 16.04 or 18.04**
+4) **Putty https://www.putty.org/**
+5) **Text editor on your local pc to save data for copy/paste**
+***
+
+***On your Local Wallet***
+* Create an address with a label MN1 and send exactly 100000 TRTT to it. Wait to complete 6 confirmations on “ Payment to yourself “ created.
+
+* Open the Debug Console ( Tools – Debug Console ) and type ***createmasternodekey***.
+You will then receive your private key, save it in a txt to use it later.
+  ```
+  Example:
+          createmasternodekey
+          w8723KqiiqtiLH6y2ktjfwzuSrNucGAbagpmTmCn1KnNEeQTJKf
+* Still at Debug Console type ***getmasternodeoutputs*** and save txhash and outputidx on a txt
+  ```
+  Exemple:
+          "txhash" : "12fce79c1a5623aa5b5830abff1a9feb6a682b75ee9fe22c647725a3gef42saa",
+		         "outputidx" : 0
+
+***On Putty***
+
+* Once logged in your vps, *copy/paste* each line one by one with *Enter*
+
+	:arrow_forward: `wget -q https://github.com/Trittium/MasternodeSetup/raw/master/install.sh`
+
+	:arrow_forward: `bash install.sh`
 
 
-### Local wallet configuration
+* Let this run, and when it ask you to install dependencies, if you're not sure press ***y*** and then enter
 
-### Send the coins to your wallet. Open Console (Tools => Debug console)
-1. Create a new address. `getnewaddress MN1`
-2. Send exactly 100000.00 coins to the generated address. (Send all coins in one transaction, fees should be paid additionally on top on 100k amount)
-3. Wait for the at least 1 confirmation of the transaction.
-4. Generate a new masternode private key by running the following command in wallet debug console `masternode genkey`.
-5. Take txID of collateral transaction by running the following command in wallet debug console `masternode outputs`. 
-6. Do not close console, or copy results to any place.
+* It will take some time and then will ask to compile the Daemon, press ***y*** and then enter 
 
-Recommended server configuration:  
-   - OS: Ubuntu 16.04 or higher
-   - Memory: 1GB
-   - Storage: 10GB minimum free space
+* Last thing script will ask you is to provide Masternode Genkey. Copy the one you got previously (createmasternodekey) and press enter.
 
+Remember to do `trittium-cli getblockcount` to check if VPS catching blocks till it synced with chain, if not follow this procedure:
 
-### Add masternode on the desktop wallet
+* Go to your wallet-qt and check peers list (click Peers button in row of buttons in top right corner of wallet, it is the one that looks like a radar or a wifi connnection icon) and select one ip from the list. With that ip do the follow command at VPS `trittium-cli addnode "ip" onetry`
 
-1. Open your local wallet 
-2. Open 'masternode.conf' file in text editor from the main/top menu (Tools->Open Masternode Configuration File)
-3. Add new line and construct the new Masternode configuration by copying your masternode private key, transaction id and transaction index
-   
-  *It should look like:* 
-  MN1 [IP address]:30001 masternodeprivkey [100K desposit transaction id. 'masternode outputs'] [100K desposit transaction index. 'masternode outputs']
-   
-  *For example:* 
-  `MN1 192.168.1.1:30001 93HaYBVUCYjEMeeH1Y4sBGLALQZE1Yc1K64xiqgX37tGBDQL8Xg 2bcd3c84c84f87eaa86e4e56834c92927a07f9e18718810b92e0d0324456a67c 0`
+      Example:
+		  trittium-cli addnode 45.32.144.158 onetry
+    
+* Check now if VPS already downloading blocks with the command `trittium-cli getblockcount`, and if still downloading blocks then give it time now to catch last block number 
 
-   - Label: `MN1`
-   - IP Address and port: `192.168.1.1:30001`
-   - Private key: `93HaYBVUCYjEMeeH1Y4sBGLALQZE1Yc1K64xiqgX37tGBDQL8Xg`
-   - Transaction ID: `629dc27b721f57c97550868cac9f7e41049d12cce8ac344732b7f74a9fc81815`
-   - Output index:  `0`
+Do not close your terminal/ command prompt window at this point.
 
-  
+***Go back to your Local Wallet***
 
-4. Save file (masternode.conf)
-5. Restart wallet.
-6. You must wait 15 confirmations of collateral transaction (100000.00 TRTT)
+* Open the Masternode Configuration file (hover over each button in the row of buttons in top right of wallet and click the button that shows 'masternode.conf'). Add a new line to this file (without #) using the template below (bold words needs to be changed) then save and close the file.
 
+**MNALIAS VPS_IP**:31001 **masternodeprivkey TXhash Output**
 
-### VPS wallet configuration
+		Example:
+		MN1 125.67.32.10:31001 w8723KqiiqtiLH6y2ktjfwzuSrNucGAbagpmTmCn1KnNEeQTJKf 12fce79c1a5623aa5b5830abff1a9feb6a682b75ee9fe22c647725a3gef42saa 0
 
-OS requirements: Ubuntu 16.04 or higher
+* Close and Re-open Local Wallet, and at Masternode Tab you will find your MN with status MISSING
 
-Run this command as root user to start the installation, then follow the instructions:
+***(For the next steps you need to have already 16 confirmation on “Payment to yourself “ created in first step)***
 
-```
-bash <( curl https://raw.githubusercontent.com/Trittium/MasternodeSetup/master/install.sh )
-```
+* Go to Debug Console type the following: ***startmasternode alias 0 [MNALIAS]***
+
+		Example:
+		startmasternode alias 0 MN1
+***
+
+***Go back to Putty***
+
+   :arrow_forward: `trittium-cli getmasternodestatus`
+
+You need to get **"status" : 4**
+
+## Congratulations your Trittium node is now running
